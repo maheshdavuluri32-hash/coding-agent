@@ -1,43 +1,23 @@
-from langchain_ollama import ChatOllama
+print("✅ Planner loaded")
 
-llm = ChatOllama(
-    model="llama3.2",
-    temperature=0,
-)
 
 def plan(user_input):
+    print("User Input:", repr(user_input))
 
-    prompt = f"""
-You are an AI Planner.
+    user = user_input.lower().strip()
 
-Your job is to classify the user's request.
+    if user.startswith("read "):
+        print("Planner Decision: READ")
+        return "READ"
 
-Choose ONLY ONE of these actions:
+    elif user.startswith("create "):
+        print("Planner Decision: CREATE")
+        return "CREATE"
 
-READ
-CREATE
-RUN
-CHAT
+    elif user.startswith("run "):
+        print("Planner Decision: RUN")
+        return "RUN"
 
-Examples:
-User: read hello.py
-READ
-
-User: create calculator.py
-CREATE
-
-User: run test.py
-RUN
-
-User: explain python
-CHAT
-
-User Request:
-{user_input}
-
-Return ONLY one word.
-"""
-
-    response = llm.invoke(prompt)
-
-    return response.content.strip().upper()
+    else:
+        print("Planner Decision: CHAT")
+        return "CHAT"

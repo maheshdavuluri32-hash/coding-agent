@@ -1,4 +1,5 @@
 from langchain_ollama import ChatOllama
+from utils.code_utils import clean_code_output, is_valid_python
 
 llm = ChatOllama(
     model="llama3.2",
@@ -6,7 +7,7 @@ llm = ChatOllama(
 )
 
 
-def fix_code(code, error):
+def fix_code(code, error, max_retries=3):
 
     prompt = f"""
 You are an expert Python programmer.
@@ -19,9 +20,22 @@ Code:
 Error:
 {error}
 
-Return ONLY the corrected Python code.
+Rules:
+- Return ONLY the corrected Python code.
+- DO NOT use markdown.
+- DO NOT use triple backticks.
+- DO NOT explain anything.
 """
 
-    response = llm.invoke(prompt)
+    for attempt in range(1, max_retries + 1):
+        response = llm.invoke(prompt)
+        fixed = clean_code_output(response.content)
 
-    return response.content
+        if fixed and is_valid_python(fixed):
+            return fixed
+
+        print(f"Debugger attempt {attempt}: invalid Python returned. Retrying...")
+
+    # Fallback: if fixing keeps failing, return original code unchanged
+    print("⚠️ Debugger failed to return valid code. Keeping original.")
+    return code

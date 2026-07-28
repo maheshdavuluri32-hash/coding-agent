@@ -1,4 +1,5 @@
 from langchain_ollama import ChatOllama
+from langchain_core.messages import SystemMessage, HumanMessage
 
 from tools.file_reader import read_file
 from tools.writer import write_file
@@ -8,6 +9,14 @@ from agents.planner import plan
 from agents.coder import generate_code
 from agents.reviewer import review_code
 from agents.debugger import fix_code
+
+from memory.chat_memory import (
+    save_memory,
+    get_memory,
+    clear_memory,
+)
+
+from rag.project_reader import read_project
 
 
 # -----------------------------
@@ -29,6 +38,9 @@ print("Commands:")
 print("read <filename>")
 print("create <filename> <task>")
 print("run <filename>")
+print("memory")
+print("clear")
+print("project")
 print("exit")
 print("=" * 50)
 
@@ -40,17 +52,83 @@ while True:
 
     user = input("\nYou: ").strip()
 
+    # -----------------------------
     # Exit
+    # -----------------------------
     if user.lower() == "exit":
         print("Goodbye!")
         break
 
-    # Planner
-    action = plan(user)
-    print(f"🧠 Planner: {action}")
+    # -----------------------------
+    # Show Memory
+    # -----------------------------
+    if user.lower() == "memory":
+
+        print("\n📚 Conversation History:\n")
+
+        history = get_memory()
+
+        if len(history) == 0:
+            print("No conversation history.")
+
+        else:
+            for chat in history:
+                print(f"You : {chat['user']}")
+                print(f"AI  : {chat['assistant']}")
+                print("-" * 50)
+
+        continue
 
     # -----------------------------
-    # Read File
+    # Clear Memory
+    # -----------------------------
+    if user.lower() == "clear":
+
+        clear_memory()
+
+        print("✅ Memory cleared.")
+
+        continue
+
+    # -----------------------------
+    # Project RAG
+    # -----------------------------
+    if user.lower() == "project":
+
+        print("📂 Reading project...\n")
+
+        codebase = read_project()
+
+        prompt = f"""
+You are an expert Python engineer.
+
+Below is my complete project.
+
+{codebase}
+
+Explain:
+
+1. Project Architecture
+2. Important Files
+3. Suggestions
+4. Bugs
+"""
+
+        response = llm.invoke(prompt)
+
+        print("\nAgent:\n")
+        print(response.content)
+
+        continue
+
+    # -----------------------------
+    # Planner
+    # -----------------------------
+    action = plan(user)
+
+    print(f"🧠 Planner: {action}")
+        # -----------------------------
+    # READ
     # -----------------------------
     if action == "READ":
 
@@ -61,8 +139,9 @@ while True:
 
         continue
 
+
     # -----------------------------
-    # Create File
+    # CREATE
     # -----------------------------
     if action == "CREATE":
 
@@ -78,21 +157,26 @@ while True:
         filename = parts[0]
         task = parts[1]
 
-        # Generate Code
+        print("\n🤖 Generating code...\n")
+
+        # Generate code
         code = generate_code(task)
 
-        # Review Code
+        # Review code
         code = review_code(code)
 
-        # Save File
+        # Save file
         print(write_file(filename, code))
 
-        # Run File
+        # Run file
         print("\n▶ Running generated code...\n")
 
         output = run_python(filename)
 
         print(output)
+
+        # Save to memory
+        save_memory(user, output)
 
         # Auto Debug
         if "Traceback" in output:
@@ -114,8 +198,9 @@ while True:
 
         continue
 
+
     # -----------------------------
-    # Run Existing File
+    # RUN
     # -----------------------------
     if action == "RUN":
 
@@ -126,6 +211,8 @@ while True:
         output = run_python(filename)
 
         print(output)
+
+        save_memory(user, output)
 
         if "Traceback" in output:
 
@@ -151,11 +238,40 @@ while True:
             print("\n✅ Program executed successfully.")
 
         continue
+        # -----------------------------
+    # CHAT
+    # -----------------------------
+    history = get_memory()
 
-    # -----------------------------
-    # Normal Chat
-    # -----------------------------
-    response = llm.invoke(user)
+    context = ""
+
+    for chat in history:
+        context += f"User: {chat['user']}\n"
+        context += f"Assistant: {chat['assistant']}\n\n"
+
+    messages = [
+        SystemMessage(
+            content=(
+                "You are a helpful AI assistant.\n"
+                "Use the previous conversation as memory.\n"
+                "If the answer exists in the memory, use it.\n"
+                "If it doesn't exist, answer normally."
+            )
+        ),
+        HumanMessage(
+            content=f"""
+Previous Conversation:
+{context}
+
+Current User:
+{user}
+"""
+        )
+    ]
+
+    response = llm.invoke(messages)
+
+    save_memory(user, response.content)
 
     print("\nAgent:")
     print(response.content)
