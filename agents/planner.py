@@ -17,6 +17,35 @@ def plan(user_input):
     elif user.startswith("run "):
         print("Planner Decision: RUN")
         return "RUN"
+    elif user == "refactor project":
+        print("Planner Decision: REFACTOR_PROJECT")
+        return "REFACTOR_PROJECT"
+
+    # -----------------------------
+    # REVIEW PROJECT
+    # -----------------------------
+    elif user == "review project":
+        print("Planner Decision: REVIEW_PROJECT")
+        return "REVIEW_PROJECT"
+
+    # -----------------------------
+    # REVIEW FILE
+    # -----------------------------
+    elif user.startswith("review "):
+        print("Planner Decision: REVIEW")
+        return "REVIEW"
+
+    elif user.startswith("debug "):
+        print("Planner Decision: DEBUG")
+        return "DEBUG"
+
+    elif user.startswith("explain "):
+        print("Planner Decision: EXPLAIN")
+        return "EXPLAIN"
+
+    elif user.startswith("search "):
+        print("Planner Decision: SEARCH")
+        return "SEARCH"
 
     else:
         print("Planner Decision: CHAT")
