@@ -38,7 +38,7 @@ from memory.chat_memory import (
 # LLM
 # -----------------------------
 llm = ChatOllama(
-    model="qwen2.5-coder:7b",
+    model="gpt-oss:120b-cloud",
     temperature=0,
 )
 
@@ -577,4 +577,6 @@ if user_input:
     st.session_state["chat_history"].append(
         {"role": "assistant", "content": response, "notes": notes}
     )
+
+    #streamlit run app.py
         

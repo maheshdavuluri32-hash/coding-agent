@@ -54,5 +54,29 @@
     {
         "user": "create aadhya.py write a program to print student details in python",
         "assistant": "\u23f1\ufe0f Timed out after 15s. The program may be waiting on input or stuck in a loop."
+    },
+    {
+        "user": "create vinay.py write a program to print weather in python",
+        "assistant": "\u23f1\ufe0f Timed out after 15s. The program may be waiting on input or stuck in a loop."
+    },
+    {
+        "user": "create dsa.py write two sum array in python",
+        "assistant": "[0, 1]\n"
+    },
+    {
+        "user": "run dsa.py",
+        "assistant": "[0, 1]\n"
+    },
+    {
+        "user": "create ravi.py write a towers of hanoi in python",
+        "assistant": ""
+    },
+    {
+        "user": "create game.py write a program To-Do List CLI in python",
+        "assistant": ""
+    },
+    {
+        "user": "create kill.py Given a string `s`, find the length of the **longest substring without repeating characters**. A substring is a contiguous sequence of characters within the string. For example, if `s = \"abcabcbb\"`, the output should be `3` because `\"abc\"` is the longest substring without repeating characters. If `s = \"bbbbb\"`, the output is `1`, and if `s = \"pwwkew\"`, the output is `3` because `\"wke\"` is the longest valid substring. Your task is to implement `lengthOfLongestSubstring(s: str) -> int` and return the maximum length. The string can contain English letters, digits, symbols, and spaces, with a maximum length of `5 * 10^4`.\nin python",
+        "assistant": ""
     }
 ]
