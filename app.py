@@ -33,7 +33,7 @@ from memory.chat_memory import (
     clear_memory,
 )
 
-
+os.environ["e94ab4542a74493c82e5970ab1589f90.WaV6mz415cC9meKTkI98xVV-"] = st.secrets["e94ab4542a74493c82e5970ab1589f90.WaV6mz415cC9meKTkI98xVV-"]
 # -----------------------------
 # LLM
 # -----------------------------
