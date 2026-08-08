@@ -5,6 +5,8 @@ Single-file Streamlit frontend + backend for the AI coding agent.
 Run with:  streamlit run app.py
 """
 
+import os
+
 import streamlit as st
 
 from langchain_ollama import ChatOllama
@@ -32,8 +34,9 @@ from memory.chat_memory import (
     get_memory,
     clear_memory,
 )
+os.environ["OLLAMA_API_KEY"] = st.secrets["OLLAMA_API_KEY"]
 
-os.environ["e94ab4542a74493c82e5970ab1589f90.WaV6mz415cC9meKTkI98xVV-"] = st.secrets["e94ab4542a74493c82e5970ab1589f90.WaV6mz415cC9meKTkI98xVV-"]
+
 # -----------------------------
 # LLM
 # -----------------------------
@@ -578,5 +581,4 @@ if user_input:
         {"role": "assistant", "content": response, "notes": notes}
     )
 
-    #streamlit run app.py
-        
+    # streamlit run app.py
