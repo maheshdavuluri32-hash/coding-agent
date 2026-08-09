@@ -1,14 +1,16 @@
 from utils.code_utils import clean_code_output, is_valid_python
 from ollama import Client
-import os
+import streamlit as st
 
+OLLAMA_API_KEY = st.secrets["OLLAMA_API_KEY"]
 
 ollama_client = Client(
     host="https://ollama.com",
     headers={
-        "Authorization": "Bearer " + os.environ["OLLAMA_API_KEY"]
+        "Authorization": "Bearer " + OLLAMA_API_KEY
     }
 )
+
 
 
 class LLMResponse:
