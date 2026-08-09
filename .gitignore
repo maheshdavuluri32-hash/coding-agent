@@ -10,3 +10,12 @@ __pycache__/
 
 # Environment variables
 .env
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Chroma database
+chroma_db/
+
+# Runtime memory
+memory/memory.json

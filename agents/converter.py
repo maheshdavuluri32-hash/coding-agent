@@ -1,9 +1,5 @@
-from langchain_ollama import ChatOllama
+from utils.llm_client import llm
 
-llm = ChatOllama(
-    model="llama3.2",
-    temperature=0,
-)
 
 def convert_code(code, target_language):
 
@@ -25,4 +21,9 @@ Code:
 
     response = llm.invoke(prompt)
 
-    return response.content.replace("```", "").replace("```python", "").strip()
+    return (
+        response.content
+        .replace("```python", "")
+        .replace("```", "")
+        .strip()
+    )

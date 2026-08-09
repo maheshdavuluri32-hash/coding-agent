@@ -9,7 +9,7 @@ import os
 
 import streamlit as st
 
-from langchain_ollama import ChatOllama
+from ollama import Client as OllamaClient
 from langchain_core.messages import SystemMessage, HumanMessage
 
 from tools.file_reader import read_file
@@ -27,6 +27,7 @@ from agents.refactor import refactor_code
 from tools.symbol_search import find_symbol
 from agents.router import route
 
+
 from rag.retriever import retrieve
 
 from memory.chat_memory import (
@@ -34,13 +35,64 @@ from memory.chat_memory import (
     get_memory,
     clear_memory,
 )
+
+# Streamlit Cloud can't run a local Ollama daemon (no background process,
+# no `ollama signin` browser flow), so we talk to Ollama's hosted Cloud API
+# directly with an API key instead of pointing at localhost:11434.
+#
+# In Streamlit Cloud: App settings -> Secrets, add:
+#   OLLAMA_API_KEY = "your_api_key_from_ollama.com/settings/keys"
 os.environ["OLLAMA_API_KEY"] = st.secrets["OLLAMA_API_KEY"]
 
+_ollama_client = OllamaClient(
+    host="https://ollama.com",
+    headers={
+        "Authorization": "Bearer " + os.environ["OLLAMA_API_KEY"]
+    },
+)
 
-# -----------------------------
-# LLM
-# -----------------------------
-llm = ChatOllama(
+
+
+
+class _LLMResponse:
+    """Minimal stand-in for langchain's AIMessage so existing `.content`
+    access elsewhere in this file keeps working unchanged."""
+
+    def __init__(self, content: str):
+        self.content = content
+
+
+class OllamaCloudLLM:
+    """Thin wrapper around ollama.Client that mimics the small subset of
+    ChatOllama's interface this app uses: `.invoke(str)` and
+    `.invoke([SystemMessage, HumanMessage, ...])`, both returning an
+    object with `.content`.
+    """
+
+    _ROLE_MAP = {"system": "system", "human": "user", "ai": "assistant"}
+
+    def __init__(self, model: str, temperature: float = 0):
+        self.model = model
+        self.temperature = temperature
+
+    def invoke(self, prompt_or_messages):
+        if isinstance(prompt_or_messages, str):
+            messages = [{"role": "user", "content": prompt_or_messages}]
+        else:
+            messages = [
+                {"role": self._ROLE_MAP.get(m.type, "user"), "content": m.content}
+                for m in prompt_or_messages
+            ]
+
+        response = _ollama_client.chat(
+            model=self.model,
+            messages=messages,
+            options={"temperature": self.temperature},
+        )
+        return _LLMResponse(response["message"]["content"])
+
+
+llm = OllamaCloudLLM(
     model="gpt-oss:120b-cloud",
     temperature=0,
 )
