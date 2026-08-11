@@ -3,7 +3,6 @@ from tools.symbol_search import find_symbol
 
 
 def route(user):
-
     result = {
         "files": [],
         "symbol": None,
@@ -26,11 +25,9 @@ def route(user):
     words = user.replace("?", "").replace(",", "").split()
 
     for word in words:
-
         path = find_symbol(word)
 
         if path:
-
             result["symbol"] = path
             return result
 

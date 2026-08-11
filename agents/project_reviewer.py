@@ -1,12 +1,8 @@
-from langchain_ollama import ChatOllama
-
-llm = ChatOllama(
-    model="llama3.2",
-    temperature=0,
-)
+from utils.llm_client import llm
 
 
 def review_project(codebase):
+    """Review the complete software project."""
 
     prompt = f"""
 You are a Senior Software Engineer.
@@ -31,6 +27,11 @@ Project:
 {codebase}
 """
 
-    response = llm.invoke(prompt)
+    try:
+        response = llm.invoke(prompt)
 
-    return response.content
+        return response.content
+
+    except Exception as e:
+        print(f"❌ Project review failed: {e}")
+        return f"Project review failed: {e}"

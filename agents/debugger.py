@@ -1,24 +1,11 @@
+from utils.llm_client import llm
 from utils.code_utils import clean_code_output, is_valid_python
-from ollama import Client
-import streamlit as st
-
-OLLAMA_API_KEY = st.secrets["OLLAMA_API_KEY"]
-
-ollama_client = Client(
-    host="https://ollama.com",
-    headers={
-        "Authorization": "Bearer " + OLLAMA_API_KEY
-    }
-)
-
-
-
-class LLMResponse:
-    def __init__(self, content):
-        self.content = content
 
 
 def fix_code(code, error, max_retries=3):
+    """
+    Automatically fix Python code based on the error output.
+    """
 
     prompt = f"""
 You are an expert Python programmer.
@@ -42,19 +29,9 @@ Rules:
     for attempt in range(1, max_retries + 1):
 
         try:
-            response = ollama_client.chat(
-                model="gpt-oss:120b-cloud",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            )
+            response = llm.invoke(prompt)
 
-            fixed = response["message"]["content"]
-
-            fixed = clean_code_output(fixed)
+            fixed = clean_code_output(response.content)
 
             if fixed and is_valid_python(fixed):
                 return fixed
@@ -65,8 +42,13 @@ Rules:
             )
 
         except Exception as e:
-            print(f"Debugger attempt {attempt} failed: {e}")
+            print(
+                f"Debugger attempt {attempt} failed: {e}"
+            )
 
-    print("⚠️ Debugger failed to return valid code. Keeping original.")
+    print(
+        "⚠️ Debugger failed to return valid code. "
+        "Keeping original."
+    )
 
     return code
